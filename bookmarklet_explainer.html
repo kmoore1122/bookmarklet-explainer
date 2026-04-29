@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bookmarklet Explainer</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f5f0e8;
+    --ink: #1a1a18;
+    --warm-mid: #8a7a6a;
+    --accent: #c84b2f;
+    --accent-light: #f0e0da;
+    --border: #ddd8ce;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    padding: 48px 24px 80px;
+  }
+  .page { max-width: 680px; margin: 0 auto; }
+
+  /* HEADER */
+  .header { margin-bottom: 56px; opacity: 0; animation: fadeUp 0.6s ease forwards; }
+  .eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+  h1 { font-family: 'Playfair Display', serif; font-size: clamp(28px, 5vw, 42px); font-weight: 700; line-height: 1.15; color: var(--ink); margin-bottom: 16px; }
+  h1 em { font-style: italic; color: var(--accent); }
+  .header-sub { font-size: 15px; color: var(--warm-mid); line-height: 1.6; max-width: 480px; }
+
+  /* STEPS */
+  .step { margin-bottom: 40px; opacity: 0; animation: fadeUp 0.6s ease forwards; }
+  .step:nth-child(1) { animation-delay: 0.1s; }
+  .step:nth-child(2) { animation-delay: 0.2s; }
+  .step:nth-child(3) { animation-delay: 0.3s; }
+  .step:nth-child(4) { animation-delay: 0.4s; }
+  .step:nth-child(5) { animation-delay: 0.5s; }
+
+  .step-label { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .step-num { font-family: 'Playfair Display', serif; font-size: 11px; font-style: italic; color: var(--warm-mid); min-width: 20px; }
+  .step-title { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink); }
+  .step-line { flex: 1; height: 1px; background: var(--border); }
+
+  .card { border-radius: 12px; padding: 24px 28px; border: 1px solid var(--border); }
+
+  /* STEP 1 — PROBLEM */
+  .card-problem { background: #fff; position: relative; overflow: hidden; }
+  .card-problem::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); }
+  .problem-scene { display: flex; align-items: flex-start; gap: 16px; }
+  .avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #c84b2f, #e07a5f); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; margin-top: 2px; }
+  .thought-bubble { background: #f8f5f2; border-radius: 10px; padding: 14px 18px; flex: 1; position: relative; border: 1px solid var(--border); }
+  .thought-bubble::before { content: ''; position: absolute; left: -8px; top: 14px; border: 8px solid transparent; border-right-color: var(--border); }
+  .thought-bubble::after { content: ''; position: absolute; left: -6px; top: 15px; border: 7px solid transparent; border-right-color: #f8f5f2; }
+  .thought-text { font-size: 14px; line-height: 1.6; color: var(--ink); margin-bottom: 10px; }
+  .thought-text strong { font-weight: 500; }
+  .url-pill { display: inline-flex; align-items: center; gap: 6px; background: white; border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--warm-mid); }
+  .url-dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
+  .frustration-tags { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .tag { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--accent-light); color: var(--accent); font-family: 'DM Mono', monospace; }
+
+  /* STEP 2 — SOLUTION */
+  .card-solution { background: #fff; position: relative; overflow: hidden; }
+  .card-solution::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #4a9e6b; }
+  .solution-text { font-size: 15px; line-height: 1.7; color: var(--ink); margin-bottom: 16px; }
+  .solution-text strong { font-weight: 500; }
+  .constraint-note { margin-top: 14px; font-size: 12px; color: var(--warm-mid); display: flex; align-items: flex-start; gap: 6px; line-height: 1.5; }
+
+  /* STEP 3 — PROMPT */
+  .card-prompt { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+  .prompt-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: #666; margin-bottom: 12px; }
+  .prompt-text { font-size: 14px; line-height: 1.8; color: #e8e4dc; font-style: italic; font-family: 'Playfair Display', serif; font-weight: 400; border-left: 2px solid var(--accent); padding-left: 16px; margin-bottom: 16px; }
+  .prompt-highlight { color: #f0c080; font-style: normal; font-family: 'DM Mono', monospace; font-size: 12px; }
+  .copy-prompt { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #aaa; padding: 6px 12px; border-radius: 5px; font-family: 'DM Mono', monospace; font-size: 10px; cursor: pointer; transition: all 0.15s; }
+  .copy-prompt:hover { background: rgba(255,255,255,0.12); color: #ddd; }
+
+  /* STEP 4 — BROWSER DEMO */
+  .card-demo { background: #fff; padding: 0; overflow: hidden; }
+  .browser-shell { background: #f0ede8; border-bottom: 1px solid var(--border); padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .traffic-lights { display: flex; gap: 5px; }
+  .tl { width: 10px; height: 10px; border-radius: 50%; }
+  .tl-r { background: #ff5f57; }
+  .tl-y { background: #ffbd2e; }
+  .tl-g { background: #28c840; }
+  .browser-url { flex: 1; background: white; border: 1px solid var(--border); border-radius: 4px; padding: 4px 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--warm-mid); }
+  .bookmarks-row { background: #f8f5f0; border-bottom: 1px solid var(--border); padding: 5px 16px; display: flex; gap: 6px; }
+  .bm { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--warm-mid); padding: 2px 8px; border-radius: 3px; background: #ede9e2; border: 1px solid transparent; white-space: nowrap; cursor: default; }
+  .bm.magic { background: var(--ink); color: #f0c080; cursor: pointer; transition: all 0.15s; border-color: var(--ink); }
+  .bm.magic:hover { background: #333; }
+  .bm.magic.fired { background: var(--accent); color: white; border-color: var(--accent); }
+  .vendor-page { padding: 24px; position: relative; min-height: 220px; }
+  .vendor-top { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+  .ai-logo { width: 44px; height: 44px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .vendor-name-big { font-size: 20px; font-weight: 500; color: var(--ink); }
+  .vendor-tagline-sm { font-size: 12px; color: var(--warm-mid); margin-top: 2px; font-style: italic; }
+  .pricing-row { display: flex; gap: 10px; }
+  .price-card { flex: 1; background: #f8f5f0; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; text-align: center; }
+  .price-tier { font-size: 11px; color: var(--warm-mid); margin-bottom: 4px; font-family: 'DM Mono', monospace; }
+  .price-amt { font-size: 18px; font-weight: 500; color: var(--ink); }
+  .price-sub { font-size: 10px; color: var(--warm-mid); }
+
+  /* Overlay on vendor page */
+  .gmail-overlay { position: absolute; top: 20px; right: 20px; width: 230px; background: white; border: 1.5px solid var(--ink); border-radius: 10px; box-shadow: 5px 5px 0px var(--ink); padding: 16px; opacity: 0; transform: translateY(-6px); transition: all 0.3s cubic-bezier(0.34, 1.4, 0.64, 1); pointer-events: none; z-index: 10; }
+  .gmail-overlay.show { opacity: 1; transform: translateY(0); pointer-events: all; }
+  .ov-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .ov-title { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); }
+  .ov-domain { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--warm-mid); margin-bottom: 10px; }
+  .ov-stat { display: flex; justify-content: space-between; padding: 3px 0; }
+  .ov-stat-label { font-size: 11px; color: var(--warm-mid); }
+  .ov-stat-val { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; color: var(--ink); }
+  .ov-stat-val.warn { color: var(--accent); }
+  .ov-stat-val.ok { color: #4a9e6b; }
+  .ov-threads { margin-top: 10px; }
+  .ov-thread { padding: 6px 0; border-top: 1px solid #f0ede8; }
+  .ov-thread-subj { font-size: 11px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ov-thread-meta { font-size: 10px; color: var(--warm-mid); font-family: 'DM Mono', monospace; margin-top: 1px; }
+  .ov-footer { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 9px; color: #bbb; font-family: 'DM Mono', monospace; text-align: center; }
+
+  /* STEP 5 — GMAIL RESULT */
+  .card-gmail { background: white; padding: 0; overflow: hidden; }
+  .gmail-topbar { background: #fff; border-bottom: 1px solid var(--border); padding: 10px 16px; display: flex; align-items: center; gap: 12px; }
+  .gmail-logo { display: flex; align-items: center; gap: 4px; }
+  .gmail-m { font-size: 22px; font-weight: 700; background: linear-gradient(135deg, #EA4335, #FBBC04, #34A853, #4285F4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .gmail-wordmark { font-size: 18px; font-weight: 300; color: #5f6368; letter-spacing: -0.3px; }
+  .gmail-search-bar { flex: 1; background: #f1f3f4; border-radius: 24px; padding: 7px 16px; display: flex; align-items: center; gap: 8px; }
+  .gmail-search-text { font-size: 12px; color: #5f6368; flex: 1; font-family: 'DM Mono', monospace; }
+  .gmail-result-label { padding: 8px 16px; font-size: 11px; color: var(--warm-mid); font-family: 'DM Mono', monospace; background: #f9f6f0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .domain-badge { background: #e8f0fe; color: #1a73e8; padding: 2px 8px; border-radius: 10px; font-size: 10px; }
+  .gmail-thread-list {}
+  .gmail-thread { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid #f0ede8; cursor: pointer; transition: background 0.1s; }
+  .gmail-thread:hover { background: #f8f5f0; }
+  .gmail-thread.unread { background: #fefefe; }
+  .g-check { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #ccc; flex-shrink: 0; }
+  .g-star { color: #ccc; font-size: 13px; flex-shrink: 0; }
+  .g-star.lit { color: #f4b400; }
+  .g-from { font-size: 13px; font-weight: 500; color: var(--ink); min-width: 150px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .gmail-thread.read .g-from { font-weight: 400; color: #5f6368; }
+  .g-body { flex: 1; font-size: 13px; color: #5f6368; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .g-subj { color: var(--ink); }
+  .gmail-thread.read .g-subj { color: #5f6368; }
+  .g-date { font-size: 11px; color: #5f6368; min-width: 44px; text-align: right; font-family: 'DM Mono', monospace; }
+
+  /* CONNECTOR */
+  .connector { display: flex; justify-content: center; margin: -8px 0; color: var(--border); font-size: 20px; line-height: 1; }
+
+  /* FOOTER */
+  .footer-note { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); opacity: 0; animation: fadeUp 0.6s ease 0.7s forwards; }
+  .footer-note p { font-size: 13px; color: var(--warm-mid); line-height: 1.7; }
+  .footer-note strong { color: var(--ink); font-weight: 500; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="eyebrow">No code. No installs. Just a bookmark.</div>
+    <h1>Your browser can do more<br>than you think.<br><em>In about 5 minutes.</em></h1>
+    <p class="header-sub">A bookmarklet is a tiny JavaScript snippet that lives in your bookmark bar. Click it on any page and it does something useful. Here's one example — built with a single Claude prompt, on the free plan.</p>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step">
+    <div class="step-label">
+      <span class="step-num">01</span>
+      <span class="step-title">The Problem</span>
+      <div class="step-line"></div>
+    </div>
+    <div class="card card-problem">
+      <div class="problem-scene">
+        <div class="avatar">🧠</div>
+        <div class="thought-bubble">
+          <p class="thought-text">I'm evaluating <strong>yet another AI tool.</strong> I'm on their pricing page. But I genuinely cannot remember — did someone from our team already email these people? Did we do a demo? Did they ghost us?</p>
+          <div class="url-pill"><div class="url-dot"></div>neuralflow.ai/pricing</div>
+          <div class="frustration-tags">
+            <span class="tag">tab switching</span>
+            <span class="tag">gmail searching</span>
+            <span class="tag">lost context</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector">↓</div>
+
+  <!-- STEP 2 -->
+  <div class="step">
+    <div class="step-label">
+      <span class="step-num">02</span>
+      <span class="step-title">The Solution</span>
+      <div class="step-line"></div>
+    </div>
+    <div class="card card-solution">
+      <p class="solution-text">A bookmarklet that sits in your bookmark bar. On any website, one click opens Gmail pre-filtered to every email thread involving that domain. No tab switching. No searching. <strong>Just answers.</strong></p>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div style="background:#f8f5f0;border:1px solid var(--border);border-radius:5px;padding:4px 10px;font-family:'DM Mono',monospace;font-size:11px;color:var(--warm-mid);">📧 did we already fall for this one?</div>
+        <span style="font-size:12px;color:var(--warm-mid);">← lives right here in your bar</span>
+      </div>
+      <div class="constraint-note">
+        <span>※</span>
+        <span>Bookmarklets can read the page URL but can't access Gmail directly — so it opens a filtered Gmail search in a new window. Want the inline overlay? Claude can help you build a Chrome extension for that instead.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector">↓</div>
+
+  <!-- STEP 3 -->
+  <div class="step">
+    <div class="step-label">
+      <span class="step-num">03</span>
+      <span class="step-title">The Claude Prompt</span>
+      <div class="step-line"></div>
+    </div>
+    <div class="card card-prompt">
+      <div class="prompt-label">paste this into Claude — free plan works →</div>
+      <p class="prompt-text">"Create a bookmarklet I can drag to my bookmark bar. When I click it on any website, it should open Gmail in a new window filtered to emails from or to that site's domain. Name it <span class="prompt-highlight">'did we already fall for this one?'</span>"</p>
+      <button class="copy-prompt" onclick="copyPrompt(this)">⎘ copy prompt</button>
+    </div>
+  </div>
+
+  <div class="connector">↓</div>
+
+  <!-- STEP 4 -->
+  <div class="step">
+    <div class="step-label">
+      <span class="step-num">04</span>
+      <span class="step-title">Click the Bookmark</span>
+      <div class="step-line"></div>
+    </div>
+    <div class="card card-demo">
+      <div class="browser-shell">
+        <div class="traffic-lights"><div class="tl tl-r"></div><div class="tl tl-y"></div><div class="tl tl-g"></div></div>
+        <div class="browser-url">neuralflow.ai/pricing</div>
+      </div>
+      <div class="bookmarks-row">
+        <span class="bm">📁 Drive</span>
+        <span class="bm magic" id="bmBtn" onclick="fireDemo()">📧 did we already fall for this one?</span>
+      </div>
+      <div class="vendor-page">
+        <div class="vendor-top">
+          <div class="ai-logo">✦</div>
+          <div>
+            <div class="vendor-name-big">NeuralFlow AI</div>
+            <div class="vendor-tagline-sm">"the last AI platform you'll ever need to evaluate"</div>
+          </div>
+        </div>
+        <div class="pricing-row">
+          <div class="price-card"><div class="price-tier">Starter</div><div class="price-amt">$49</div><div class="price-sub">/ mo</div></div>
+          <div class="price-card"><div class="price-tier">Pro</div><div class="price-amt">$199</div><div class="price-sub">/ mo</div></div>
+          <div class="price-card" style="border-color:#667eea;background:#f5f3ff;"><div class="price-tier" style="color:#667eea;">Enterprise</div><div class="price-amt" style="font-size:14px;padding-top:4px;">Let's talk</div><div class="price-sub">we'll find you</div></div>
+        </div>
+
+        <div class="gmail-overlay" id="gmailOverlay">
+          <div class="ov-header"><span style="font-size:16px;">✉️</span><span class="ov-title">Gmail threads</span></div>
+          <div class="ov-domain">neuralflow.ai</div>
+          <div class="ov-stat"><span class="ov-stat-label">Threads found</span><span class="ov-stat-val">3</span></div>
+          <div class="ov-stat"><span class="ov-stat-label">Last contact</span><span class="ov-stat-val warn">47 days ago</span></div>
+          <div class="ov-stat"><span class="ov-stat-label">You replied</span><span class="ov-stat-val ok">twice</span></div>
+          <div class="ov-threads">
+            <div class="ov-thread"><div class="ov-thread-subj">Re: Quick intro — NeuralFlow x PERQ</div><div class="ov-thread-meta">sales@neuralflow.ai · Mar 12</div></div>
+            <div class="ov-thread"><div class="ov-thread-subj">Following up on the demo 👋</div><div class="ov-thread-meta">alex@neuralflow.ai · Mar 19</div></div>
+            <div class="ov-thread"><div class="ov-thread-subj">Did you get a chance to review?</div><div class="ov-thread-meta">alex@neuralflow.ai · Mar 31</div></div>
+          </div>
+          <div class="ov-footer">click to open full Gmail search →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector">↓</div>
+
+  <!-- STEP 5 — GMAIL RESULT -->
+  <div class="step">
+    <div class="step-label">
+      <span class="step-num">05</span>
+      <span class="step-title">Gmail Opens — Pre-Filtered</span>
+      <div class="step-line"></div>
+    </div>
+    <div class="card card-gmail">
+      <div class="gmail-topbar">
+        <div class="gmail-logo">
+          <span class="gmail-m">M</span>
+          <span class="gmail-wordmark">Gmail</span>
+        </div>
+        <div class="gmail-search-bar">
+          <span style="font-size:13px;">🔍</span>
+          <span class="gmail-search-text">from:neuralflow.ai OR to:neuralflow.ai</span>
+        </div>
+      </div>
+      <div class="gmail-result-label">
+        3 conversations matching domain
+        <span class="domain-badge">neuralflow.ai</span>
+      </div>
+      <div class="gmail-thread-list">
+        <div class="gmail-thread unread">
+          <div class="g-check"></div>
+          <div class="g-star lit">★</div>
+          <div class="g-from">alex @ NeuralFlow</div>
+          <div class="g-body"><span class="g-subj">Did you get a chance to review?</span> — Hey, just circling back on our last conversation...</div>
+          <div class="g-date">Mar 31</div>
+        </div>
+        <div class="gmail-thread read">
+          <div class="g-check"></div>
+          <div class="g-star">☆</div>
+          <div class="g-from">alex @ NeuralFlow</div>
+          <div class="g-body"><span class="g-subj">Following up on the demo 👋</span> — Thanks again for taking the time last week...</div>
+          <div class="g-date">Mar 19</div>
+        </div>
+        <div class="gmail-thread read">
+          <div class="g-check"></div>
+          <div class="g-star">☆</div>
+          <div class="g-from">sales @ NeuralFlow</div>
+          <div class="g-body"><span class="g-subj">Quick intro — NeuralFlow x PERQ</span> — Hi! I came across PERQ and thought there might be a great fit...</div>
+          <div class="g-date">Mar 12</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <p>This took <strong>5 minutes</strong> and one prompt. The free plan at claude.ai is enough — no credit card, no expiration. The constraint is real: bookmarklets can't talk to Gmail's API, so it opens a search window rather than an inline overlay. If you want that, Claude can build you a Chrome extension instead. <strong>Start small. Ship the bookmark first.</strong></p>
+  </div>
+
+</div>
+<script>
+  let demoFired = false;
+  function fireDemo() {
+    const btn = document.getElementById('bmBtn');
+    const overlay = document.getElementById('gmailOverlay');
+    if (demoFired) {
+      overlay.classList.remove('show');
+      btn.classList.remove('fired');
+      demoFired = false;
+      return;
+    }
+    btn.classList.add('fired');
+    setTimeout(() => { overlay.classList.add('show'); demoFired = true; }, 250);
+  }
+  function copyPrompt(btn) {
+    const text = `Create a bookmarklet I can drag to my bookmark bar. When I click it on any website, it should open Gmail in a new window filtered to emails from or to that site's domain. Name it "did we already fall for this one?"`;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✓ copied';
+      setTimeout(() => btn.innerHTML = '⎘ copy prompt', 1800);
+    });
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && demoFired) {
+      document.getElementById('gmailOverlay').classList.remove('show');
+      document.getElementById('bmBtn').classList.remove('fired');
+      demoFired = false;
+    }
+  });
+</script>
+</body>
+</html>
